@@ -1,106 +1,54 @@
-# Lumina Feedback Dashboard
----
+##Lumina 
 
-## Features
+#How to Start Locally
 
-### Feedback List
+First, install dependencies:
 
-Customer feedback is displayed in a responsive card grid. Each card includes the customer name, initials, feedback date, sentiment badge, and full feedback text.
+npm install
 
-### Search Bar
+Then start the local development server:
 
-The search bar filters feedback as the user types. It searches across both the customer name and feedback text.
+npm run dev
 
-### Sentiment Filtering
+Open the app in your browser:
 
-Users can filter the list by:
+http://localhost:3000
 
-- All Feedback
-- Positive
-- Neutral
-- Negative
-
-Search and sentiment filtering work together, so users can narrow results by both text and sentiment at the same time.
-
-### Sentiment Trend Chart
-
-The dashboard includes a chart for tracking feedback trends over time.
-
-Users can:
-
-- Toggle between Positive, Neutral, and Negative feedback
-- Group chart data by Day, Week, Month, or Year
-
-
-### Empty State
-
-If no feedback matches the current search or filter, the app displays a clear empty state instead of leaving the results area blank.
-
-### Responsive Design
-
-The layout is responsive and works across desktop and smaller screens. Feedback cards collapse into a single-column layout on smaller viewports.
 
 ---
 
 ## Tech Stack
 
-### Next.js 15
-
-Next.js was used for the application structure and routing. The App Router provides a modern React setup while keeping the project lightweight for a single-page dashboard.
-
-### TypeScript
-
-TypeScript was used to define the feedback data model, sentiment types, and chart grouping types. This helps prevent invalid sentiment values and keeps the data flow easier to reason about.
-
-### Tailwind CSS
-
-Tailwind CSS was used for styling because it supports fast, consistent UI development without introducing separate CSS files for each component. It also made it easier to maintain a clean, minimal visual system within the assessment time window.
-
-### Zustand
-
-Zustand was used for lightweight UI state management. The app only needs to manage the search query and active sentiment filter globally, so Zustand provides a simple solution without unnecessary complexity.
-
-### Chart.js and react-chartjs-2
-
-Chart.js was used for the feedback trend visualization. The chart is implemented as a bar chart because the data is count-based and relatively small, making bars easier to read than a smoothed line chart.
-
-### lucide-react
-
-lucide-react was used for simple interface icons such as search, dropdown, and empty state icons.
+- **Next.js 15** for the React app structure and routing
+- **TypeScript** for safer data and component types
+- **Tailwind CSS** for fast and consistent styling
+- **Zustand** for lightweight search and filter state management
+- **Chart.js / react-chartjs-2** for the feedback trend chart
+- **lucide-react** for simple UI icons
 
 ---
 
-## Design Notes
+## Design Choices
 
-The interface is designed to feel minimal, polished, and easy to scan.
+The UI is designed to be minimal, clean, and easy to scan.
 
-Key design choices:
+I used a neutral color palette, white cards, subtle borders, rounded corners, and soft shadows to keep the dashboard uncluttered. Sentiment colors are used only where they help communicate meaning: green for positive, gray for neutral, and red for negative.
 
-- Neutral color palette
-- White card surfaces
-- Subtle borders and shadows
-- Generous spacing
-- Rounded corners
-- Sentiment color used only where it adds meaning
-- Simple controls instead of complex dashboard widgets
----
+Feedback is shown in cards because it makes each customer comment easy to separate and read. The search and filter controls are placed above the cards so users can quickly narrow the list.
 
-## Problems Considered and Solutions
-
-### Zustand State in Next.js App Router
-
-A global Zustand store can be problematic in server-rendered environments because state may be shared across requests if the store is created as a module-level singleton.
-
-**Solution:** The app uses a store factory with a provider pattern so each app instance receives its own store.
-
-### Stale Filtered Results
-
-Storing filtered feedback as separate state can lead to stale UI when the search query or sentiment filter changes.
-
-**Solution:** The filtered list is derived during render from the current search query and active sentiment.
-
+The chart shows one selected sentiment at a time instead of showing every sentiment together. This keeps the chart easier to read, especially with a small dataset.
 
 ---
+
+## State Management
+
+Zustand is used to manage the dashboard’s search and filter state.
+
+The filtered feedback list is not stored separately. Instead, it is calculated during render based on the current search query and selected sentiment. This keeps the logic simple and avoids stale filtered results.
+
+The app also uses a Zustand store factory with a provider pattern instead of a global singleton. This is safer in a Next.js App Router project because server-rendered modules can be reused across requests.
+
+The chart’s selected sentiment and time grouping are kept as local component state because they only affect the chart.
 
 ## Tradeoffs and Future Improvements
 
