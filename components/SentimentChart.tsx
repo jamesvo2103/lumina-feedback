@@ -7,6 +7,7 @@ import {
   CategoryScale,
   LinearScale,
   BarElement,
+  BarController,
   Tooltip,
   type TooltipItem,
 } from "chart.js";
@@ -15,7 +16,7 @@ import { feedback } from "@/data/feedback";
 import { groupFeedbackByTimeBucket, type TimeBucket } from "@/lib/utils";
 import type { Sentiment } from "@/types";
 
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
+ChartJS.register(CategoryScale, LinearScale, BarElement, BarController, Tooltip);
 
 const SENTIMENTS: Sentiment[] = ["Positive", "Neutral", "Negative"];
 const BUCKETS: TimeBucket[] = ["Day", "Week", "Month", "Year"];
@@ -32,13 +33,11 @@ const SENTIMENT_HOVER: Record<Sentiment, string> = {
   Negative: "#ef4444",
 };
 
-const TOTAL_BY_SENTIMENT: Record<Sentiment, number> = feedback.reduce(
-  (acc, item) => {
-    acc[item.sentiment]++;
-    return acc;
-  },
-  { Positive: 0, Neutral: 0, Negative: 0 } as Record<Sentiment, number>,
-);
+const TOTAL_BY_SENTIMENT: Record<Sentiment, number> = {
+  Positive: feedback.filter((f) => f.sentiment === "Positive").length,
+  Neutral: feedback.filter((f) => f.sentiment === "Neutral").length,
+  Negative: feedback.filter((f) => f.sentiment === "Negative").length,
+};
 
 export function SentimentChart() {
   const [sentiment, setSentiment] = useState<Sentiment>("Positive");
@@ -48,14 +47,13 @@ export function SentimentChart() {
 
   const { data, options } = useMemo(() => {
     const grouped = groupFeedbackByTimeBucket(feedback, bucket);
-    const counts = grouped.map((g) => g[sentiment]);
 
     const chartData = {
       labels: grouped.map((g) => g.label),
       datasets: [
         {
           label: sentiment,
-          data: counts,
+          data: grouped.map((g) => g[sentiment]),
           backgroundColor: SENTIMENT_COLOR[sentiment],
           hoverBackgroundColor: SENTIMENT_HOVER[sentiment],
           borderRadius: 6,
@@ -119,10 +117,7 @@ export function SentimentChart() {
             Feedback Trends
           </h2>
           <p className="mt-1 text-xs text-neutral-400">
-            <span
-              className="font-semibold text-neutral-900"
-              style={{ color: SENTIMENT_COLOR[sentiment] }}
-            >
+            <span style={{ color: SENTIMENT_COLOR[sentiment] }} className="font-semibold">
               {total}
             </span>{" "}
             {sentiment.toLowerCase()} {total === 1 ? "response" : "responses"}
@@ -157,29 +152,26 @@ export function SentimentChart() {
         aria-label="Select sentiment"
         className="mt-5 inline-flex rounded-lg border border-neutral-200 bg-neutral-100 p-0.5"
       >
-        {SENTIMENTS.map((s) => {
-          const active = s === sentiment;
-          return (
-            <button
-              key={s}
-              type="button"
-              role="tab"
-              aria-selected={active}
-              onClick={() => setSentiment(s)}
-              className={
-                active
-                  ? "px-3 py-1 text-xs font-medium rounded-md bg-white text-neutral-900 shadow-sm"
-                  : "px-3 py-1 text-xs font-medium rounded-md text-neutral-500 hover:text-neutral-900 transition-colors"
-              }
-            >
-              {s}
-            </button>
-          );
-        })}
+        {SENTIMENTS.map((s) => (
+          <button
+            key={s}
+            type="button"
+            role="tab"
+            aria-selected={s === sentiment}
+            onClick={() => setSentiment(s)}
+            className={
+              s === sentiment
+                ? "px-3 py-1 text-xs font-medium rounded-md bg-white text-neutral-900 shadow-sm"
+                : "px-3 py-1 text-xs font-medium rounded-md text-neutral-500 hover:text-neutral-900 transition-colors"
+            }
+          >
+            {s}
+          </button>
+        ))}
       </div>
 
       <div className="mt-5 h-64">
-        <Bar data={data} options={options} />
+        <Bar key={`${sentiment}-${bucket}`} data={data} options={options} />
       </div>
     </section>
   );

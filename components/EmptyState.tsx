@@ -1,4 +1,3 @@
-
 import { MessageSquareOff } from "lucide-react";
 
 export function EmptyState() {

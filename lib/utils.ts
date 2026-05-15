@@ -3,7 +3,6 @@ import { FeedbackItem, Sentiment } from "@/types";
 export type TimeBucket = "Day" | "Week" | "Month" | "Year";
 
 export interface BucketedSentiment {
-  key: string;
   label: string;
   Positive: number;
   Neutral: number;
@@ -24,16 +23,19 @@ export function formatDate(dateStr: string): string {
 }
 
 function isoWeek(d: Date): { year: number; week: number; monday: Date } {
-  const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const dayOfWeek = date.getDay() || 7;
-  date.setDate(date.getDate() + 4 - dayOfWeek);
-  const isoYear = date.getFullYear();
+  const thursday = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const dayOfWeek = thursday.getDay() || 7;
+  thursday.setDate(thursday.getDate() + 4 - dayOfWeek);
+
+  const isoYear = thursday.getFullYear();
   const yearStart = new Date(isoYear, 0, 1);
   const week = Math.ceil(
-    ((date.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7,
+    ((thursday.getTime() - yearStart.getTime()) / 86_400_000 + 1) / 7,
   );
+
   const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   monday.setDate(monday.getDate() - (dayOfWeek - 1));
+
   return { year: isoYear, week, monday };
 }
 
@@ -46,21 +48,19 @@ function bucketFor(
   if (bucket === "Day") {
     return {
       key: dateStr,
-      label: d.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      }),
+      label: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
     };
   }
 
   if (bucket === "Week") {
     const { year, week, monday } = isoWeek(d);
+    const weekLabel = monday.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+    });
     return {
       key: `${year}-W${String(week).padStart(2, "0")}`,
-      label: `Week of ${monday.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      })}`,
+      label: `Week of ${weekLabel}`,
     };
   }
 
@@ -69,10 +69,7 @@ function bucketFor(
     const month = d.getMonth();
     return {
       key: `${year}-${String(month + 1).padStart(2, "0")}`,
-      label: d.toLocaleDateString("en-US", {
-        month: "short",
-        year: "numeric",
-      }),
+      label: d.toLocaleDateString("en-US", { month: "short", year: "numeric" }),
     };
   }
 
@@ -95,7 +92,11 @@ export function groupFeedbackByTimeBucket(
     if (existing) {
       existing.counts[item.sentiment]++;
     } else {
-      const counts: Record<Sentiment, number> = { Positive: 0, Neutral: 0, Negative: 0 };
+      const counts: Record<Sentiment, number> = {
+        Positive: 0,
+        Neutral: 0,
+        Negative: 0,
+      };
       counts[item.sentiment] = 1;
       map.set(key, { label, counts });
     }
@@ -103,11 +104,5 @@ export function groupFeedbackByTimeBucket(
 
   return Array.from(map.entries())
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, { label, counts }]) => ({
-      key,
-      label,
-      Positive: counts.Positive,
-      Neutral: counts.Neutral,
-      Negative: counts.Negative,
-    }));
+    .map(([, { label, counts }]) => ({ label, ...counts }));
 }
