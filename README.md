@@ -52,9 +52,9 @@ Zustand is used to manage the dashboard’s search and filter state.
 
 The filtered feedback list is not stored separately. Instead, it is calculated during render based on the current search query and selected sentiment. This keeps the logic simple and avoids stale filtered results.
 
-The app also uses a Zustand store factory with a provider pattern instead of a global singleton. This is safer in a Next.js App Router project because server-rendered modules can be reused across requests.
+The app uses a Zustand store factory with a Provider instead of one global store. This means the store is created through a function and passed into the app through a wrapper. In Next.js App Router, this is safer because server-rendered modules can be reused between requests. If the store were global, different users could accidentally share the same stored state.
 
-The chart’s selected sentiment and time grouping are kept as local component state because they only affect the chart.
+The chart’s selected sentiment and time grouping are kept as local component state because they only affect the chart. They do not need to be shared with the rest of the app. Keeping them local makes the code simpler and avoids putting small chart-only UI settings into Zustand.
 
 ## Tradeoffs and Future Improvements
 
