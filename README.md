@@ -1,7 +1,8 @@
 # Lumina Feedback Dashboard
 
 ---
-
+##Live Demo 
+https://lumina-feedback-kappa.vercel.app/
 ## Getting Started
 
 ### Install dependencies
