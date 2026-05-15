@@ -1,38 +1,38 @@
-# Lumina-Feedback
+# Lumina Feedback Dashboard
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+A minimalist internal tool for reading and filtering customer feedback.
 
-## Getting Started
+## Tech Stack
 
-First, run the development server:
+Next.js 16 (App Router) · React 19 · Zustand · Tailwind CSS v4 · Chart.js · lucide-react
+
+## Setup
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Design Decisions
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Visual language**: Apple-inspired minimalism — neutral palette, generous whitespace,
+subtle card shadows, color used only for sentiment badges. No decorative elements.
 
-## Learn More
+**State management**: Zustand uses a factory + Context Provider pattern (not a global
+singleton) to prevent state leaking between server-rendered requests in Next.js App
+Router. The store holds only `searchQuery` and `activeSentiment`. Filtering is derived
+at render time — no `useEffect`, no stale state.
 
-To learn more about Next.js, take a look at the following resources:
+**Search + filter**: Both predicates compose together, so searching `James` while
+filtering by `Negative` works simultaneously.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+**Chart**: Always uses the full unfiltered dataset so the trend view reflects all
+historical data regardless of what the user is currently filtering.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Tradeoffs
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Static data (no backend) to stay within sprint scope
+- No pagination — would add for 50+ entries
+- No date-range filter on chart — natural next feature
