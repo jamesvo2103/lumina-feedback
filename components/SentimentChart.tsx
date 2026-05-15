@@ -11,7 +11,7 @@ import {
   Tooltip,
   type TooltipItem,
 } from "chart.js";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Info } from "lucide-react";
 import { feedback } from "@/data/feedback";
 import { groupFeedbackByTimeBucket, type TimeBucket } from "@/lib/utils";
 import type { Sentiment } from "@/types";
@@ -39,9 +39,14 @@ const TOTAL_BY_SENTIMENT: Record<Sentiment, number> = {
   Negative: feedback.filter((f) => f.sentiment === "Negative").length,
 };
 
+const TOOLTIP_TEXT =
+  "Shows the number of feedback responses for the selected sentiment over time. " +
+  "Use the sentiment toggle and time grouping control to change the view.";
+
 export function SentimentChart() {
   const [sentiment, setSentiment] = useState<Sentiment>("Positive");
   const [bucket, setBucket] = useState<TimeBucket>("Day");
+  const [infoVisible, setInfoVisible] = useState(false);
 
   const total = TOTAL_BY_SENTIMENT[sentiment];
 
@@ -113,9 +118,33 @@ export function SentimentChart() {
     <section className="bg-white border border-neutral-200 rounded-2xl p-6 shadow-sm">
       <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-neutral-900 tracking-tight">
-            Feedback Trends
-          </h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-sm font-semibold text-neutral-900 tracking-tight">
+              Feedback Trends
+            </h2>
+            <div className="relative flex items-center">
+              <button
+                type="button"
+                aria-label="Explain feedback trends chart"
+                onMouseEnter={() => setInfoVisible(true)}
+                onMouseLeave={() => setInfoVisible(false)}
+                onFocus={() => setInfoVisible(true)}
+                onBlur={() => setInfoVisible(false)}
+                className="flex items-center justify-center text-neutral-400 hover:text-neutral-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/20 rounded-full transition-colors"
+              >
+                <Info size={13} />
+              </button>
+              {infoVisible && (
+                <div
+                  role="tooltip"
+                  className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 rounded-lg border border-neutral-200 bg-white px-3 py-2.5 shadow-md text-xs text-neutral-600 leading-relaxed z-10 pointer-events-none"
+                >
+                  {TOOLTIP_TEXT}
+                  <div className="absolute left-1/2 -translate-x-1/2 top-full w-2 h-2 -mt-1 rotate-45 bg-white border-r border-b border-neutral-200" />
+                </div>
+              )}
+            </div>
+          </div>
           <p className="mt-1 text-xs text-neutral-400">
             <span style={{ color: SENTIMENT_COLOR[sentiment] }} className="font-semibold">
               {total}
