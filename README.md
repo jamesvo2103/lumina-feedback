@@ -1,19 +1,24 @@
-##Lumina 
+# Lumina Feedback Dashboard
 
-#How to Start Locally
+---
 
-First, install dependencies:
+## Getting Started
 
+### Install dependencies
+
+```bash
 npm install
+```
 
-Then start the local development server:
+### Run the development server
 
+```bash
 npm run dev
+```
 
-Open the app in your browser:
+### Open the app
 
-http://localhost:3000
-
+[http://localhost:3000](http://localhost:3000)
 
 ---
 
